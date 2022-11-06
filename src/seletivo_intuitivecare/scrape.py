@@ -28,6 +28,7 @@ def download_files(urls: list[str], path) -> list[str]:
     files = []
     for url in urls:
         file_name = path + url.split("/")[-1]
+        print(f"Baixando: {url}")
         save(requests.get(url, stream=True), file_name)
         files.append(file_name)
     return files
@@ -43,6 +44,7 @@ def save(request: requests.Response, file_path: str):
 def zip_files(files: list[str], dest):
     """Agrupa arquivos baixados em 'teste1.zip'"""
     with ZipFile(dest, "w") as zip_:
+        print(f"Argupando em: {os.path.abspath(dest)}")
         for file in files:
             zip_.write(file)
 
