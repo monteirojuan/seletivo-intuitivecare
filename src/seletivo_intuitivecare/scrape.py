@@ -17,15 +17,19 @@ def scrape():
     path = find_download_path()
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
-    files: list[str] = []
+    urls = [link["href"] for link in soup.find_all(name="a", href=True, text=re.compile("Anexo"))]
+    files_path = download_files(urls, path)
+    zip_files(files_path, path + "teste1.zip")
 
-    for link in soup.find_all(name="a", href=True, text=re.compile("Anexo")):
-        file_name = path + link["href"].split("/")[-1]
-        request = requests.get(link["href"], stream=True)
-        save(request, file_name)
+
+def download_files(urls: list[str], path) -> list[str]:
+    """Faz o download dos arquivos."""
+    files = []
+    for url in urls:
+        file_name = path + url.split("/")[-1]
+        save(requests.get(url, stream=True), file_name)
         files.append(file_name)
-
-    zip_files(files)
+    return files
 
 
 def save(request: requests.Response, file_path: str):
@@ -35,9 +39,9 @@ def save(request: requests.Response, file_path: str):
             fd.write(chunk)
 
 
-def zip_files(files: list[str]):
+def zip_files(files: list[str], dest):
     """Agrupa arquivos baixados em 'teste1.zip'"""
-    with ZipFile(find_download_path() + "teste1.zip", "w") as zip_:
+    with ZipFile(dest, "w") as zip_:
         for file in files:
             zip_.write(file)
 
