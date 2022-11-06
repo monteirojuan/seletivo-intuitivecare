@@ -20,6 +20,7 @@ def scrape():
     urls = [link["href"] for link in soup.find_all(name="a", href=True, text=re.compile("Anexo"))]
     files_path = download_files(urls, path)
     zip_files(files_path, path + "teste1.zip")
+    cleanup(files_path)
 
 
 def download_files(urls: list[str], path) -> list[str]:
@@ -44,6 +45,12 @@ def zip_files(files: list[str], dest):
     with ZipFile(dest, "w") as zip_:
         for file in files:
             zip_.write(file)
+
+
+def cleanup(files):
+    """Remove os arquivos temporários."""
+    for file in files:
+        os.remove(file)
 
 
 def find_download_path():
