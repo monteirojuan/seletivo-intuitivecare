@@ -4,10 +4,11 @@ Objetivo: baixar anexos (I a IV) e agrupar em um arquivo zip.
 """
 import os
 import re
-from zipfile import ZipFile
 
 import requests
 from bs4 import BeautifulSoup
+
+from seletivo_intuitivecare import utils
 
 URL = "https://www.gov.br/ans/pt-br/assuntos/consumidor/o-que-o-seu-plano-de-saude-deve-cobrir-1/o-que-e-o-rol-de-procedimentos-e-evento-em-saude"
 
@@ -19,8 +20,8 @@ def scrape():
     soup = BeautifulSoup(page.content, 'html.parser')
     urls = [link["href"] for link in soup.find_all(name="a", href=True, text=re.compile("Anexo"))]
     files_path = download_files(urls, path)
-    zip_files(files_path, path + "teste1.zip")
-    cleanup(files_path)
+    utils.zip_files(files_path, path + "teste1.zip")
+    utils.cleanup(files_path)
 
 
 def download_files(urls: list[str], path) -> list[str]:
@@ -39,20 +40,6 @@ def save(request: requests.Response, file_path: str):
     with open(file_path, 'wb') as fd:
         for chunk in request.iter_content(chunk_size=256):
             fd.write(chunk)
-
-
-def zip_files(files: list[str], dest):
-    """Agrupa arquivos baixados em 'teste1.zip'"""
-    with ZipFile(dest, "w") as zip_:
-        print(f"Argupando em: {os.path.abspath(dest)}")
-        for file in files:
-            zip_.write(file)
-
-
-def cleanup(files):
-    """Remove os arquivos temporários."""
-    for file in files:
-        os.remove(file)
 
 
 def find_download_path():
